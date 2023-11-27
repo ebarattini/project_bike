@@ -1,0 +1,8 @@
+pandas
+matplotlib
+seaborn
+pyarrow
+scikit-learn
+folium
+ipython
+jupyterlab
