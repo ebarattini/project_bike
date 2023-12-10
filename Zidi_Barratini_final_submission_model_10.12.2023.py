@@ -3,14 +3,10 @@
 
 # # MAP 536 - Python for Data Science - Predicting Cyclist Traffic in Paris
 
-# In[ ]:
-
-
 import pandas as pd
 import numpy as np
 from datetime import datetime
 import holidays
-
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split
 from sklearn.compose import ColumnTransformer
@@ -21,9 +17,6 @@ from sklearn.base import clone
 from xgboost import XGBRegressor
 from catboost import CatBoostRegressor
 from sklearn.ensemble import StackingRegressor
-
-
-# In[2]:
 
 
 def save_results_to_csv(data, base_filename):
@@ -77,6 +70,7 @@ def save_submission_csv(test_data, predictions, model_name):
     results_df.to_csv(submission_filename, index=False)
     print(results_df)
     
+
 def preprocess_data(train_file, test_file, final_test_file, weather_file, 
                     lockdown_file, holiday_file, subscribers_file, sncf_file):
     """
@@ -250,6 +244,7 @@ def _encode_dates(X):
     
     return X
 
+
 def bin_temperature(df):
     """
     Bins temperature values and one-hot encodes the binned categories.
@@ -325,140 +320,98 @@ def remove_outliers(df, column, multiplier=1.5):
     return df[outlier_mask]
 
 
-# In[3]:
+def main():
+    # Loading the data
+    train_data_processed, test_data_processed = preprocess_data(
+        "train.parquet", "test.parquet", "final_test.parquet",
+        "hourly-weather-data.csv", "lockdown-data.csv",
+        "paris_school_holidays_2020_2022_correct.csv",
+        "velib_subscribers_2020_2022.csv",
+        "sncf_passengers_delayed_hourly_2020_2022.csv"
+    )
+
+    # Splitting the X and y from the training data
+    X = train_data_processed.drop('log_bike_count', axis=1)
+    y = train_data_processed['log_bike_count']
+    X_test = test_data_processed
+
+    # Define categorical and numerical features
+    categorical_features = ['counter_name']
+    numerical_features = [
+        "feelslike", "humidity", "precip", "windspeed", "Subscribers",
+        "SNCFpassengersDelayedInParisPerHour"
+    ]
+
+    # Preprocessor for XGBoost
+    xgb_preprocessor = ColumnTransformer(
+        transformers=[
+            ('num', StandardScaler(), numerical_features),
+            ('cat', OneHotEncoder(handle_unknown='ignore'), categorical_features)
+        ],
+        remainder='passthrough'
+    )
+
+    # XGBoost model parameters
+    xgb_params = {
+        'colsample_bytree': 0.977,
+        'gamma': 0.472,
+        'learning_rate': 0.118,
+        'max_depth': 10,
+        'min_child_weight': 4.0,
+        'n_estimators': 600,
+        'reg_alpha': 0.031,
+        'reg_lambda': 0.037,
+        'subsample': 0.681,
+        'objective': 'reg:squarederror',
+        'n_jobs': -1,
+        'verbosity': 0
+    }
+
+    # Initialize XGBoost model
+    xgb_model = XGBRegressor(**xgb_params)
+
+    # Create XGBoost pipeline
+    xgb_pipeline = Pipeline([
+        ('preprocessor', xgb_preprocessor),
+        ('model', xgb_model)
+    ])
+
+    # Scale 'Subscribers' column in both training and test sets
+    X['Subscribers'] /= 400000
+    X_test['Subscribers'] /= 400000
+
+    # CatBoost model parameters
+    catboost_params = {
+        'depth': 12,
+        'iterations': 1500,
+        'l2_leaf_reg': 3.877,
+        'rsm': 0.496,
+        'subsample': 0.445,
+        'cat_features': [X.columns.get_loc('counter_name')],
+        'verbose': 100
+    }
+
+    # Initialize CatBoost model
+    catboost_model = CatBoostRegressor(**catboost_params)
+
+    # Define StackingRegressor
+    stacked_model = StackingRegressor(
+        estimators=[
+            ('xgboost', xgb_pipeline),
+            ('catboost', catboost_model)
+        ],
+        final_estimator=LinearRegression()
+    )
+
+    # Fit the stacked model
+    stacked_model.fit(X, y)
+
+    # Make predictions
+    predictions = stacked_model.predict(X_test)
+
+    # Save the predictions to a CSV file
+    save_submission_csv(predictions, "Submission.csv")
 
 
-train_data_processed, test_data_processed = preprocess_data(
-    "train.parquet", "test.parquet", "final_test.parquet", 
-    "hourly-weather-data.csv", "lockdown-data.csv", "paris_school_holidays_2020_2022_correct.csv",
-    "velib_subscribers_2020_2022.csv", "sncf_passengers_delayed_hourly_2020_2022.csv"
-)
-
-
-# In[4]:
-
-
-# splitting the X y from the training data 
-X = train_data_processed.drop('log_bike_count', axis=1)
-y = train_data_processed['log_bike_count']
-X_test=test_data_processed
-
-
-# In[5]:
-
-
-# counter_name is the only categorical column
-categorical_features = ['counter_name']
-numerical_features = ["feelslike", "humidity", "precip","windspeed","Subscribers","SNCFpassengersDelayedInParisPerHour"]
-
-# Preprocessor for XGBoost
-xgb_preprocessor = ColumnTransformer(
-    transformers=[
-        ('num', StandardScaler(), numerical_features),
-        ('cat', OneHotEncoder(handle_unknown='ignore'), categorical_features)
-    ],
-    remainder='passthrough'  # Pass through other features without transformation
-)
-
-# Preprocessor for CatBoost
-catboost_preprocessor = ColumnTransformer(
-    transformers=[
-        ('num', StandardScaler(), numerical_features)
-    ],
-    remainder='passthrough'  # Passes through other features including the categorical feature without transformation
-)
-
-
-# In[6]:
-
-
-# Initialize XGBoost with the best parameters
-xgb_params = {
-    'colsample_bytree': 0.9770938171127415,
-    'gamma': 0.47218960940491295,
-    'learning_rate': 0.11795427856021579,
-    'max_depth': 10,
-    'min_child_weight': 4.0,
-    'n_estimators': 600,
-    'reg_alpha': 0.031467061215090325,
-    'reg_lambda': 0.03673201979521254,
-    'subsample': 0.68118920119262,
-    'objective': 'reg:squarederror',
-    'n_jobs': -1,
-    'verbosity': 0
-}
-
-# Create the XGBoost model with the specified parameters
-xgb_model = XGBRegressor(**xgb_params)
-
-# Create the XGBoost pipeline
-xgb_pipeline = Pipeline([
-    ('preprocessor', xgb_preprocessor),
-    ('model', xgb_model)
-])
-
-
-# In[7]:
-
-
-# Scale the 'Subscribers' column in the training set
-X['Subscribers'] = X['Subscribers'] / 400000  # This because the preprocessor changes the indices for Catboost causing problems
-
-# Scale the 'Subscribers' column in the test set
-X_test['Subscribers'] = X_test['Subscribers'] / 400000
-
-
-# In[8]:
-
-
-# Define the index of the categorical feature
-cat_features_index = [X.columns.get_loc('counter_name')]
-
-# CatBoost best parameters 
-catboost_params = {
-    'depth': 12,
-    'iterations': 1500,
-    'l2_leaf_reg': 3.87741648,
-    'rsm': 0.495940279,
-    'subsample': 0.445083553,
-    'cat_features': cat_features_index,
-    'verbose': 100
-}
-
-# Initialize CatBoost with the best parameters
-catboost_model = CatBoostRegressor(**catboost_params)
-
-
-# In[9]:
-
-
-# Stacking the models
-stacked_model = StackingRegressor(
-    estimators=[
-        ('xgboost', xgb_pipeline),  
-        ('catboost', catboost_model)
-    ],
-    final_estimator=LinearRegression()
-)
-
-
-# In[10]:
-
-
-# fit the model on the training data
-stacked_model.fit(X, y)
-
-
-# In[11]:
-
-
-# Make predictions
-predictions = stacked_model.predict(X_test)
-
-
-# In[12]:
-
-
-# Save the submission into a .csv file
-save_submission_csv(X_test, predictions,"Submission")
-
+if __name__ == "__main__":
+    main()
