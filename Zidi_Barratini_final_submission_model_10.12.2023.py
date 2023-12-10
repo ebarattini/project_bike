@@ -1,7 +1,18 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# # MAP 536 - Python for Data Science - Predicting Cyclist Traffic in Paris
+"""
+MAP 536 - Python for Data Science
+Project: Predicting Cyclist Traffic in Paris
+
+Authored by:
+- ZIDI Mohamed-El Hocine
+- Barattini Elise
+
+This script includes functions for preprocessing various datasets for analysis and model training.
+Datasets include train data, test data, weather information, lockdown details,
+school holiday schedules, Vélib' bike-sharing subscribers, and SNCF train delays.
+"""
 
 import pandas as pd
 import numpy as np
@@ -74,22 +85,29 @@ def save_submission_csv(test_data, predictions, model_name):
 def preprocess_data(train_file, test_file, final_test_file, weather_file, 
                     lockdown_file, holiday_file, subscribers_file, sncf_file):
     """
-    Preprocesses the bike sharing data by combining, cleaning, and merging it with 
-    external data sources like weather, holidays, and lockdown information.
+    Preprocesses the given datasets for further analysis or model training.
 
-    Parameters:
+    Args:
     - train_file: Path to the training data file.
-    - test_file: Path to the test data file.
+    - test_file: Path to the testing data file.
     - final_test_file: Path to the final test data file.
-    - weather_file: Path to the weather data file.
+    - weather_file: Path to the historical weather data file.
+      Source: Visual Crossing Weather History (https://www.visualcrossing.com/weather-history/Paris%2CFrance)
     - lockdown_file: Path to the lockdown data file.
-    - holiday_file: Path to the holiday data file.
-    - subscribers_file: Path to the subscribers data file.
-    - sncf_file: Path to the SNCF (French National Railway Company) data file.
+      Note: This data was compiled from news articles detailing the timeline of lockdowns in France.
+      Source: Timeline of lockdowns in France (https://www.researchgate.net/figure/Timeline-of-lockdowns-in-France-and-data-collection_fig1_356080898)
+    - school_holiday_file: Path to the school holiday data file.
+      Note: This data was generated based on the official school holiday dates in France.
+      Source: French school holidays official dates (https://www.connexionfrance.com/article/Practical/Everyday-Life/French-school-holidays-in-France-official-dates-for-2020)
+    - velib_subscribers_file: Path to the Vélib' bike-sharing service subscriber data file.
+      Note: This data provides insights into the number of subscribers over different years.
+      Source: Vélib' Metropole (https://www.velib-metropole.fr/en/service#:~:text=V%C3%A9lib%27%20in%20numbers%20%3A,390%2C000%20subscribers%20in%202022)
+    - sncf_delays_file: Path to the SNCF train delays data file.
+      Note: This data contains information about passengers delayed on an hourly basis.
+      Source: SNCF Open Data (https://www.sncf.com/en/commitments/transparency/open-data)
 
     Returns:
-    - train_data: Preprocessed training data.
-    - test_data: Preprocessed test data.
+    Processed train_data, test_data, and final_test_data.
     """
 
     # Load main datasets
@@ -410,7 +428,7 @@ def main():
     predictions = stacked_model.predict(X_test)
 
     # Save the predictions to a CSV file
-    save_submission_csv(predictions, "Submission.csv")
+    save_submission_csv(X_test, predictions, "submission_stackedXGbCatb.csv")
 
 
 if __name__ == "__main__":
