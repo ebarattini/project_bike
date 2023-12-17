@@ -7,8 +7,8 @@ This project aims to predict bicycle usage in Paris, focusing on optimizing regr
 #### Datasets 
 In addition to the core dataset for the problem, we added a number of additional datasets to enhance our model. All the data used is listed below:
 - Bike counters data
-    - Train set (link)
-    - Test set (link)
+    - [Train Set](main/train.parquet)
+    - [Test Set](main/test.parquet)
 - [French school holidays](https://www.data.gouv.fr/en/datasets/jours-feries-en-france/.): This dataset comprises of public school holidays by region. This data is chosen over public holiday dates as it more effectively captures the movement patterns of the French population, giving a better insight into regional travel and activity during these periods.
 - [Lockdown data](https://www.researchgate.net/figure/Timeline-of-lockdowns-in-France-and-data-collection_fig1_356080898.): The ”Lockdown Data” dataset is a custom-created, one-hot encoded representation capturing the timeline of lockdown measures in Paris, including both full and partial lockdowns. It meticulously details the periods of school and business closures, providing a binary (0 or 1) indication for each day to signify the presence or absence of these specific lockdown measures.
 - [Weather data](https://www.visualcrossing.com/weather/weather-data-services/paris/metric/2020-01-01/2023-11-29.): The weather data shows hourly observations of over 20 weather factors in Paris. It was chosen over the provided weather dataset (external data) as it provides more frequent observations and thus could improve our model’s accuracy in predicting bicycle counts at a specific hour.
