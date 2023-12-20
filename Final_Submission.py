@@ -11,7 +11,7 @@ Authored by:
 
 This script includes functions for preprocessing various datasets for analysis and model training.
 Datasets include train data, test data, weather information, lockdown details,
-school holiday schedules, Vélib' bike-sharing subscribers, and SNCF train delays.
+school holiday schedules, VÃ©lib' bike-sharing subscribers, and SNCF train delays.
 """
 
 import pandas as pd
@@ -99,9 +99,9 @@ def preprocess_data(train_file, test_file, final_test_file, weather_file,
     - school_holiday_file: Path to the school holiday data file.
       Note: This data was generated based on the official school holiday dates in France.
       Source: French school holidays official dates (https://www.connexionfrance.com/article/Practical/Everyday-Life/French-school-holidays-in-France-official-dates-for-2020)
-    - velib_subscribers_file: Path to the Vélib' bike-sharing service subscriber data file.
+    - velib_subscribers_file: Path to the VÃ©lib' bike-sharing service subscriber data file.
       Note: This data provides insights into the number of subscribers over different years.
-      Source: Vélib' Metropole (https://www.velib-metropole.fr/en/service#:~:text=V%C3%A9lib%27%20in%20numbers%20%3A,390%2C000%20subscribers%20in%202022)
+      Source: VÃ©lib' Metropole (https://www.velib-metropole.fr/en/service#:~:text=V%C3%A9lib%27%20in%20numbers%20%3A,390%2C000%20subscribers%20in%202022)
     - sncf_delays_file: Path to the SNCF train delays data file.
       Note: This data contains information about passengers delayed on an hourly basis.
       Source: SNCF Open Data (https://www.sncf.com/en/commitments/transparency/open-data)
