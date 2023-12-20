@@ -2,7 +2,7 @@
 ### README - Predicting Bicycle Usage in Paris
 
 #### Project Overview
-This project aims to predict bicycle usage in Paris, focusing on optimizing regression models to forecast the number of bikes in use. The primary objective is to minimize the Root Mean Square Error (RMSE). Our Exploratory Data Analysis can be found [here](EDA.ipynb). Our final model comprises of a CATboost and XGBoost stacked model, the preprocessing steps can be found [here](Final_Preprocessing.ipynb), while the model itself with the final results can be found [here](Final_Model.ipynb).
+This project aims to predict bicycle usage in Paris, focusing on optimizing regression models to forecast the number of bikes in use. The primary objective is to minimize the Root Mean Square Error (RMSE). Our Exploratory Data Analysis can be found [here](EDA.ipynb). Our final model comprises of a CATboost and XGBoost stacked model, the preprocessing steps can be found [here](Final_Preprocessing.ipynb), while the model itself with the RMSE results can be found [here](Final_Model.ipynb).
 
 #### Datasets 
 In addition to the core dataset for the problem, we added a number of additional datasets to enhance our model. All the data used is listed below:
